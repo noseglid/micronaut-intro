@@ -1,0 +1,19 @@
+micronaut:
+  application:
+    name: micronaut-java-template
+  endpoints:
+    health:
+      enabled: true
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        descriptions: true
+
+endpoints:
+  prometheus:
+    sensitive: false
+
+jackson:
+  serialization-inclusion: ALWAYS

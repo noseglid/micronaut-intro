@@ -1,0 +1,17 @@
+version: 2
+registries:
+  maven-repository-nexus-storytel-com-content-groups-public:
+    type: maven-repository
+    url: https://nexus.storytel.com/content/groups/public/
+    username: deployment
+    password: "${{secrets.MAVEN_REPOSITORY_NEXUS_STORYTEL_COM_CONTENT_GROUPS_PUBLIC_PASSWORD}}"
+
+updates:
+- package-ecosystem: gradle
+  directory: "/"
+  schedule:
+    interval: weekly
+    time: "08:00"
+  open-pull-requests-limit: 99
+  registries:
+  - maven-repository-nexus-storytel-com-content-groups-public

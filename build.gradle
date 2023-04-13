@@ -1,0 +1,97 @@
+plugins {
+    id("io.micronaut.application") version "3.7.0"
+    id("org.sonarqube") version "3.4.0.2513"
+    id 'jacoco'
+}
+
+group = "com.storytel"
+
+repositories {
+    mavenLocal()
+    maven {
+        credentials {
+            username getProperty('NEXUS_USERNAME')
+            password getProperty('NEXUS_PASSWORD')
+        }
+        url "${getProperty('NEXUS_URL')}/content/groups/public"
+    }
+}
+
+configurations {
+    // for dependencies that are needed for development only
+    developmentOnly
+}
+
+
+ext {
+    micronautVersion = "3.8.1"
+}
+
+micronaut {
+    version "${micronautVersion}"
+    runtime("netty")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("com.storytel.*")
+    }
+}
+
+dependencies {
+    implementation platform("io.micronaut:micronaut-parent:${micronautVersion}") // Used for dependabot trigger
+    implementation("io.micronaut:micronaut-validation")
+    implementation("io.micronaut:micronaut-runtime")
+    implementation("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut:micronaut-management")
+    implementation("io.micronaut.gcp:micronaut-gcp-logging")
+    implementation "io.micronaut.micrometer:micronaut-micrometer-core"
+    implementation "io.micronaut.micrometer:micronaut-micrometer-registry-prometheus"
+
+    annotationProcessor("io.micronaut.serde:micronaut-serde-processor")
+    implementation("io.micronaut.serde:micronaut-serde-jackson")
+
+    testImplementation platform("org.junit:junit-bom:5.9.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+
+    testAnnotationProcessor "io.micronaut:micronaut-inject-java"
+    testImplementation("io.micronaut.test:micronaut-test-junit5")
+    testImplementation("org.mockito:mockito-core:5.0.0")
+    testImplementation("io.rest-assured:rest-assured:5.1.1")
+}
+
+
+application {
+    mainClass.set("com.storytel.Application")
+    applicationDefaultJvmArgs = [
+        '-XX:MaxRAMPercentage=75.0'
+    ]
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.exclusions", "build/**"
+        property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+        property "sonar.junit.reportPaths", "build/test-results/test"
+    }
+}
+
+test {
+    finalizedBy jacocoTestReport
+    reports {
+        junitXml.required = true
+        html.required = false
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+    }
+}
